@@ -1,0 +1,7 @@
+bg;0;0;0
+baseline_border;255;255;0
+text;128;128;128
+baselines;255;0;0
+start_points;0;0;255
+end_points;0;0;128
+seperator;0;255;0
