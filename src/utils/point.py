@@ -13,6 +13,14 @@ class Point:
         self.x = round(self.x*scale_factor)
         self.y = round(self.y*scale_factor)
 
+
+    def scalex(self, scale_factor: float):
+        self.x = round(self.x*scale_factor)
+
+
+    def scaley(self, scale_factor: float):
+        self.y = round(self.y*scale_factor)
+
     def set_from_string(self, coords: str, sep: str = ','):
         """
         Sets the coordinates according to the String coords assuming the strucutre: 'xsepy'.

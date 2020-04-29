@@ -1,10 +1,10 @@
 {
     "cfg_model_name" : "GCN",
     "cfg_img_size" : 1024,
-    "cfg_exp_name" : "nn_upscaling",
+    "cfg_exp_name" : "exp",
     "cfg_gpu" : "3",
     "cfg_lr" : 4e-4,
-    "cfg_data_folder" : "data/cBAD_1024_btsb",
+    "cfg_data_folder" : "data/cBAD_1024_min",
     "cfg_output_folder" : "trained_models/GCN",
     "cfg_batch_size" : 2,
     "cfg_epochs" : 120

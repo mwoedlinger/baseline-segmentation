@@ -26,7 +26,7 @@ class XMLParserBaselines:
         self.input_folder = input_folder
         self.output_folder = output_folder
 
-        self.size_parameter = size_parameter #TODO: change, ugly
+        self.size_parameter = size_parameter #change, ugly
         self.region_types, _, self.colors = load_class_dict(class_file)
 
         self.scaled = False
@@ -237,16 +237,16 @@ class XMLParserBaselines:
             if region_type in ['start_points', 'end_points']:
                 region = self.regions[region_type]
                 for p in region:
-                    cv2.circle(img=img, center=(p.x, p.y), radius=dot_thickness, color=self.colors[region_type],
+                    cv2.circle(img=img, center=(p.x, p.y), radius=dot_thickness+1, color=self.colors[region_type],
                                thickness=-1)
             elif region_type == 'sp_ep_border':
                 region = self.regions['start_points']
                 for p in region:
-                    cv2.circle(img=img, center=(p.x, p.y), radius=int(1.5*dot_thickness), color=self.colors[region_type],
+                    cv2.circle(img=img, center=(p.x, p.y), radius=int(1.5*dot_thickness)+2, color=self.colors[region_type],
                                thickness=-1)
                 region = self.regions['end_points']
                 for p in region:
-                    cv2.circle(img=img, center=(p.x, p.y), radius=int(1.5*dot_thickness), color=self.colors[region_type],
+                    cv2.circle(img=img, center=(p.x, p.y), radius=int(1.5*dot_thickness)+2, color=self.colors[region_type],
                                thickness=-1)
             elif region_type == 'bg':
                 continue
@@ -282,7 +282,7 @@ class XMLParserBaselines:
 
         return img
 
-    def scale_baselines(self, max_side: int):
+    def scale_baselines(self, min_side: int):
         """
         For images with at least one side larger than max_side scales the image and polygons
         such that the maximal side length is given by max_side.
@@ -291,13 +291,13 @@ class XMLParserBaselines:
         """
         if self.scaled:
             return
-        elif max(self.width, self.height) > max_side:
-            ratio = max_side / max(self.width, self.height)
+        else:
+            ratio = min_side / min(self.width, self.height)
             w = self.width
             h = self.height
 
-            self.width = max_side if w > h else round(w * ratio)
-            self.height = max_side if h > w else round(h * ratio)
+            self.width = min_side if w < h else round(w * ratio)
+            self.height = min_side if h < w else round(h * ratio)
 
             for region in self.baselines:
                 for point in region:
@@ -305,35 +305,3 @@ class XMLParserBaselines:
 
             self.scaled = True
 
-    def scale(self, max_side: int):
-        """
-        For images with at least one side larger than max_side scales the image and polygons
-        such that the maximal side length is given by max_side.
-        If max_side is larger than the maximum of width and height nothing is done.
-        :param max_side: Maximally allowed side length
-        """
-        if self.scaled:
-            return
-        elif max(self.width, self.height) > max_side:
-            ratio = max_side / max(self.width, self.height)
-            w = self.width
-            h = self.height
-
-            self.width = max_side if w > h else round(w * ratio)
-            self.height = max_side if h > w else round(h * ratio)
-
-            for region_type in self.region_types:
-                if region_type in ['start_points', 'end_points', 'sp_border']:
-                    continue
-                else:
-                    for region in self.regions[region_type]:
-                        for point in region:
-                            point.scale(ratio)
-
-            for point in self.regions['start_points']:
-                point.scale(ratio)
-
-            for point in self.regions['end_points']:
-                point.scale(ratio)
-
-            self.scaled = True

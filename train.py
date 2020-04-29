@@ -1,55 +1,44 @@
-import os
-from sacred import Experiment
+import argparse
+import json
 from src.experiment.experiment import SegmentationExperiment
 
-ex = Experiment('segmentation_TU_library_cards')
-
-
-@ex.config
-def cgf():
-    """
-    Config function for the sacred experiment.
-    """
-    cfg_model_name = 'GCN'
-    cfg_img_size = 1024
-    cfg_exp_name = 'v13_'+cfg_model_name + '_' + str(cfg_img_size) + '_btsb_nn_upscaling'
-    cfg_gpu = '3'
-    cfg_lr = 6e-4#
-    cfg_data_folder = os.path.join('data', 'cBAD_'+str(cfg_img_size)+'_btsb')
-    cfg_output_folder = os.path.join('trained_models', cfg_model_name)
-    cfg_batch_size = 3
-    cfg_epochs = 120
-
-
-@ex.automain
-def train(cfg_exp_name, cfg_gpu, cfg_model_name, cfg_img_size, cfg_lr,
-          cfg_data_folder, cfg_batch_size, cfg_epochs, cfg_output_folder):
+def train(config, weights=None):
     """
     Trains the model.
-    :param cfg_exp_name:    Name of the experiment
-    :param cfg_gpu:         gpu that should be used
-    :param cfg_model_name:  Name of the model
-    :param cfg_img_size:    Image size. (cfg_img_size x cfg_img_size)
-    :param cfg_lr:          Learning rate
-    :param cfg_data_folder: Folder that contains train, test and eval data
-    :param cfg_batch_size:  Batch size
-    :param cfg_epochs:      Number of epochs
+    cfg_exp_name:    Name of the experiment
+    cfg_gpu:         gpu that should be used
+    cfg_model_name:  Name of the model
+    cfg_img_size:    Image size. (cfg_img_size x cfg_img_size)
+    cfg_lr:          Learning rate
+    cfg_data_folder: Folder that contains train, test and eval data
+    cfg_batch_size:  Batch size
+    cfg_epochs:      Number of epochs
     """
-
-    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-    os.environ['CUDA_VISIBLE_DEVICES'] = cfg_gpu
-
-    if not os.path.isdir(os.path.join(cfg_output_folder)):
-        os.mkdir(os.path.join(cfg_output_folder))
-
-    exp = SegmentationExperiment(cfg_exp_name, cfg_gpu, cfg_model_name, cfg_img_size, cfg_lr,
-                                 cfg_data_folder, cfg_batch_size, cfg_epochs, cfg_output_folder)
-
-    print('## Train model')
-    exp.train_model()
-
-    print('## Save model')
-    exp.save_model()
-
-    print('## Test model')
+    exp = SegmentationExperiment(config['cfg_exp_name'],
+                                 config['cfg_gpu'],
+                                 config['cfg_model_name'],
+                                 config['cfg_img_size'],
+                                 config['cfg_lr'],
+                                 config['cfg_data_folder'],
+                                 config['cfg_batch_size'],
+                                 config['cfg_epochs'],
+                                 config['cfg_output_folder'])
+    exp.train()
     exp.test_model()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Trains the model.')
+    parser.add_argument('--config', help='The config file.', required=False)
+    args = vars(parser.parse_args())
+
+    config_file = args['config']
+    if config_file is None:
+        config_file = 'config_' + args['model_type'] + '.json'
+
+    print('## Load config from file: ' + str(config_file))
+
+    with open(config_file, 'r') as json_file:
+        config = json.loads(json_file.read())
+
+    train(config=config, weights=None)

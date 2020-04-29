@@ -15,7 +15,7 @@ def miou(input_tensor: torch.Tensor, labels: torch.Tensor, valid_classes: list):
     """
     class_map = torch.argmax(input_tensor, dim=0)
 
-    unique_labels = labels.unique()#TODO: remove? Must be constistent with semantic-segmentation-suite
+    unique_labels = labels.unique()
 
     iou_scores = {}
     for c in valid_classes:
